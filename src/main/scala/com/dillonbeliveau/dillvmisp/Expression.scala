@@ -7,7 +7,7 @@ trait Expression {
   def evaluate: Value
 }
 
-object LispNil extends Value {
+case object LispNil extends Value {
   override def +(other: Value): Value = other
   override def evaluate: Value = this
 }
@@ -22,10 +22,6 @@ class Application extends Expression {
 }
 */
 
-object Cons {
-  def apply(left: Expression, right: Expression): Cons = new Cons(left,right)
-}
-
-class Cons(val left: Expression, val right: Expression) extends Expression {
+case class Cons(val left: Expression, val right: Expression) extends Expression {
   override def evaluate: Value = ???
 }
