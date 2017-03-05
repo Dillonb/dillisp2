@@ -101,4 +101,13 @@ class LispParserSpec extends FlatSpec with Matchers {
     }
 
   }
+
+  /*
+  "parse" should "parse a token and a list of tokens" in {
+    val result = LispParser.parse(LispParser.expression, "token")
+    val token = result match {
+      case LispParser.Success(LispToken(name), _) => name shouldBe "token"
+    }
+  }
+  */
 }
