@@ -14,4 +14,8 @@ class LispInterpreterSpec extends FlatSpec with Matchers {
   "interpret" should "add some numbers in nested expressions" in {
     LispInterpreter.interpret("(+ (+ 1 2 3) 4)") shouldBe LispNumber(10)
   }
+
+  "interpret" should "apply a lambda function" in {
+    LispInterpreter.interpret("((lambda (x) (+ x 1)) 2)") shouldBe LispNumber(3)
+  }
 }

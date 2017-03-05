@@ -9,7 +9,9 @@ import com.dillonbeliveau.dillvmisp._
 object Builtins {
   def get: Map[String, Value] =
     Map(
-      "+" -> new PlusFunction(LispNumber(0))
+      "+" -> new PlusFunction(LispNumber(0)),
+
+      "lambda" -> new NewLambda()
     )
 }
 
@@ -20,7 +22,20 @@ class PlusFunction(value: LispNumber) extends Function {
     }
   }
 
+  override def toString: String = s"+${value.number}"
+
   override def result: Value = value
+}
+
+class NewLambda extends Value {
+  private def unrollArgList(args: Term): List[String] = args match {
+    case Cons(LispToken(name), xs) => name :: unrollArgList(xs)
+    case LispNil => Nil
+  }
+
+  def apply(args: Term, body: Term, scope: Scope): LambdaFunction = {
+    LambdaFunction(unrollArgList(args), scope, body)
+  }
 }
 
 trait ScopeObject {
@@ -44,13 +59,15 @@ trait Function extends Value {
 }
 
 object LambdaFunction {
-  def apply(args: Seq[String], scope: Scope, body: Expression, appliedArguments: Map[String, Value] = Map.empty): Function = new LambdaFunction(args, scope, body, appliedArguments)
+  def apply(args: Seq[String], scope: Scope, body: Term, appliedArguments: Map[String, Value] = Map.empty): LambdaFunction = new LambdaFunction(args, scope, body, appliedArguments)
 }
-class LambdaFunction(args: Seq[String], scope: Scope, body: Expression, appliedArguments: Map[String, Value] = Map.empty) extends Value with Function {
+class LambdaFunction(args: Seq[String], scope: Scope, body: Term, appliedArguments: Map[String, Value] = Map.empty) extends Value with Function {
   def apply(arg: Value): Value = args match {
+    case x :: Nil => LispInterpreter.interpret(body, scope.newChildWith(appliedArguments + (x -> arg)))
     case x :: xs => LambdaFunction(xs, scope, body, appliedArguments + (x -> arg))
-    case Nil => LispInterpreter.interpret(body, scope.newChildWith(appliedArguments))
   }
+
+  override def toString: String = s"(lambda (args) ${body.toString}"
 
   // If we're being forced to return a result (this will happen if we're called like `(fn)`, return the function with currying as-is.
   override def result: Value = this
@@ -65,15 +82,18 @@ object LispInterpreter {
     // Getting a token? Grab it.
     case LispToken(name) => scope.get(name)
 
-    // If the first thing in the sexp is a function and there's an expression in the spot where the first argument should be, evaluate it.
-    case Cons(f: Function, Cons(x: Expression, xs)) => interpret(Cons(f, Cons(interpret(x, scope.newChild), xs)))
-    // If the first thing in the sexp is a function and there's a value to apply to it, apply it.
-    case Cons(f: Function, Cons(x: Value, xs)) => interpret(Cons(f.apply(x), xs), scope)
+    // If it's a declaration of a new lambda function, take special action.
+    case Cons(f: NewLambda, Cons(args, Cons(body, LispNil))) => f.apply(args, body, scope)
 
     // If it's a list containing only a function, force getting the function's value.
     // If this is a lambda function, this means it hasn't been completely applied yet. This will return a curried version.
     // If it's a builtin that takes an arbitrary number of arguments - this will force final evaluation.
     case Cons(f: Function, LispNil) => f.result
+
+    // If the first thing in the sexp is a function and there's an expression in the spot where the first argument should be, evaluate it.
+    case Cons(f: Function, Cons(x: Expression, xs)) => interpret(Cons(f, Cons(interpret(x, scope.newChild), xs)), scope)
+    // If the first thing in the sexp is a function and there's a value to apply to it, apply it.
+    case Cons(f: Function, Cons(x: Value, xs)) => interpret(Cons(f.apply(x), xs), scope)
 
     // If the first thing in the sexp is an expression, evaluate it.
     case Cons(x: Expression, xs) => interpret(Cons(interpret(x, scope.newChild), xs), scope)
