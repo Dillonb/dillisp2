@@ -8,15 +8,21 @@ import scala.util.parsing.combinator.JavaTokenParsers
   */
 
 object LispParser extends JavaTokenParsers {
-  private def listToConsTree(list: List[Expression]): Cons = list match {
+  private def listToConsTree(list: List[Term]): Cons = list match {
     case x :: Nil => Cons(x, LispNil)
     case x :: xs => Cons(x, listToConsTree(xs))
   }
 
   def string: Parser[LispString] = "\"" ~> "[^\"]*".r <~ "\"" ^^ (s => LispString(s))
-  def number: Parser[LispNumber] = """\d+.?\d*""".r ^^ (s => LispNumber(s.toDouble))
+  def number: Parser[LispNumber] = """\d+\.?\d*""".r ^^ (s => LispNumber(s.toDouble))
   def value: Parser[Value] = string | number
-  def token: Parser[LispToken] = """\S+""".r ^^ (s => LispToken(s))
+  def token: Parser[LispToken] = """[A-Za-z\+\-\*\$\%\&\#\@]\S*""".r ^^ (s => LispToken(s))
   def list: Parser[Cons] = "(" ~> (expression+) <~ ")" ^^ (exprs => listToConsTree(exprs))
-  def expression: Parser[Expression] = value | list | token
+  def expression: Parser[Term] = value | list | token
+
+  def quickParse(code: String): Term = {
+    parse(expression, code) match {
+      case Success(matched, _) => matched
+    }
+  }
 }

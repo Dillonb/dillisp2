@@ -4,10 +4,14 @@ package com.dillonbeliveau.dillvmisp
   * Created by dillon on 3/1/17.
   */
 
-trait Expression
-trait Value extends Expression
+trait Term
+// An expression can still be evaluated.
+trait Expression extends Term
+// A value is done evaluating.
+trait Value extends Term
+
 case class LispNumber(number: Double) extends Value
 case class LispString(text: String) extends Value
-case class LispToken(name: String) extends Value
+case class LispToken(name: String) extends Expression
 case object LispNil extends Value
-case class Cons(val left: Expression, val right: Expression) extends Expression
+case class Cons(left: Term, right: Term) extends Expression
