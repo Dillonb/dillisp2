@@ -4,6 +4,7 @@ import com.dillonbeliveau.dillvmisp.lang._
 import com.dillonbeliveau.dillvmisp.parser.LispParser
 
 import scala.collection.mutable
+import scala.io.Source
 
 /**
   * Created by Dillon on 3/5/17.
@@ -26,7 +27,13 @@ case class Scope(bindings: mutable.Map[String, Value], parent: ScopeObject) exte
 }
 case object TopLevelScope extends ScopeObject {
   override def get(name: String): Value = throw new Exception(s"Value $name undefined in scope.")
-  override def newChild: Scope = this.newChildWith(Builtins.get)
+  override def newChild: Scope = {
+    val scope = this.newChildWith(Builtins.get)
+    val code = LispParser.quickParse(Source.fromResource("stdlib.l").getLines.fold("")((a,b) => a+b))
+    LispInterpreter.interpret(code, scope)
+
+    scope
+  }
 }
 
 

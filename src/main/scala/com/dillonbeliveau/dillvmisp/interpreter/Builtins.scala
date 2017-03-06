@@ -36,6 +36,8 @@ class NewLambda extends Value {
   def apply(args: Term, body: Term, scope: Scope): LambdaFunction = {
     LambdaFunction(unrollArgList(args), scope, body)
   }
+
+  override def toString: String = "new-lambda"
 }
 
 class DoFunction(lastValue: Value) extends Function {
