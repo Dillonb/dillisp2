@@ -92,8 +92,20 @@ object LispInterpreter {
 
     // If the first thing in the sexp is a function and there's an expression in the spot where the first argument should be, evaluate it.
     case Cons(f: Function, Cons(x: Expression, xs)) => interpret(Cons(f, Cons(interpret(x, scope.newChild), xs)), scope)
+
     // If the first thing in the sexp is a function and there's a value to apply to it, apply it.
-    case Cons(f: Function, Cons(x: Value, xs)) => interpret(Cons(f.apply(x), xs), scope)
+    case Cons(f: Function, Cons(x: Value, xs)) => {
+      (f.apply(x), xs) match {
+        // Keep applying arguments as long as we have them if we get a function back
+        case (f: Function, _) => interpret(Cons(f, xs), scope)
+        // If we get a value back, we're done.
+        case (v: Value, LispNil) => v
+        case _ => throw new Exception("Extra arguments on call to lambda function!")
+      }
+    }
+
+    // If we have just an expression, interpret just that expression.
+    case Cons(x: Expression, LispNil) => interpret(x, scope)
 
     // If the first thing in the sexp is an expression, evaluate it.
     case Cons(x: Expression, xs) => interpret(Cons(interpret(x, scope.newChild), xs), scope)
