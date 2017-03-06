@@ -10,6 +10,7 @@ object Builtins {
     Map(
       "+" -> new PlusFunction(LispNumber(0)),
 
+      "do" -> new DoFunction(LispNil),
       "lambda" -> new NewLambda()
     )
 }
@@ -35,4 +36,10 @@ class NewLambda extends Value {
   def apply(args: Term, body: Term, scope: Scope): LambdaFunction = {
     LambdaFunction(unrollArgList(args), scope, body)
   }
+}
+
+class DoFunction(lastValue: Value) extends Function {
+  override def apply(arg: Value): Value = new DoFunction(arg)
+
+  override def result: Value = lastValue
 }

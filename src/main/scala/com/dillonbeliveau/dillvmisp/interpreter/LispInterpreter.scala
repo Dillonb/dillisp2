@@ -1,8 +1,9 @@
 package com.dillonbeliveau.dillvmisp.interpreter
 
-import com.dillonbeliveau.dillvmisp._
 import com.dillonbeliveau.dillvmisp.lang._
 import com.dillonbeliveau.dillvmisp.parser.LispParser
+
+import scala.collection.mutable
 
 /**
   * Created by Dillon on 3/5/17.
@@ -10,12 +11,16 @@ import com.dillonbeliveau.dillvmisp.parser.LispParser
 
 
 trait ScopeObject {
-  def newChild: Scope = Scope(Map.empty, this)
-  def newChildWith(bindings: Map[String, Value]) = Scope(bindings, this)
+  def newChild: Scope = Scope(mutable.Map.empty, this)
+  def newChildWith(bindings: mutable.Map[String, Value]) = Scope(bindings, this)
+  def newChildWith(bindings: Map[String, Value]) = Scope(mutable.Map.empty ++ bindings, this)
   def get(name: String): Value
 }
-case class Scope(bindings: Map[String, Value], parent: ScopeObject) extends ScopeObject {
-  def addBinding(name: String, value: Value): Scope = Scope(bindings + (name -> value), parent)
+case class Scope(bindings: mutable.Map[String, Value], parent: ScopeObject) extends ScopeObject {
+  def addBinding(name: String, value: Value): Scope = {
+    bindings.put(name, value)
+    this
+  }
 
   override def get(name: String): Value = bindings.getOrElse(name, parent.get(name))
 }
@@ -34,6 +39,15 @@ object LispInterpreter {
     // Getting a token? Grab it.
     case LispToken(name) => scope.get(name)
 
+    // Bind values to names
+    case Cons(LispToken("define"), xs) => xs match {
+      case Cons(LispToken(name), Cons(t: Term, LispNil)) => {
+        val v = interpret(t, scope)
+        scope.addBinding(name, v)
+        v
+      }
+    }
+
     // If it's a declaration of a new lambda function, take special action.
     case Cons(f: NewLambda, Cons(args, Cons(body, LispNil))) => f.apply(args, body, scope)
 
@@ -43,7 +57,7 @@ object LispInterpreter {
     case Cons(f: Function, LispNil) => f.result
 
     // If the first thing in the sexp is a function and there's an expression in the spot where the first argument should be, evaluate it.
-    case Cons(f: Function, Cons(x: Expression, xs)) => interpret(Cons(f, Cons(interpret(x, scope.newChild), xs)), scope)
+    case Cons(f: Function, Cons(x: Expression, xs)) => interpret(Cons(f, Cons(interpret(x, scope), xs)), scope)
 
     // If the first thing in the sexp is a function and there's a value to apply to it, apply it.
     case Cons(f: Function, Cons(x: Value, xs)) => {
@@ -60,7 +74,7 @@ object LispInterpreter {
     case Cons(x: Expression, LispNil) => interpret(x, scope)
 
     // If the first thing in the sexp is an expression, evaluate it.
-    case Cons(x: Expression, xs) => interpret(Cons(interpret(x, scope.newChild), xs), scope)
+    case Cons(x: Expression, xs) => interpret(Cons(interpret(x, scope), xs), scope)
   }
 
   def interpret(expression: Term): Value = {

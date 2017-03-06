@@ -1,6 +1,5 @@
 package com.dillonbeliveau.dillvmisp.interpreter
 
-import com.dillonbeliveau.dillvmisp._
 import com.dillonbeliveau.dillvmisp.lang.{Term, Value}
 
 /**
