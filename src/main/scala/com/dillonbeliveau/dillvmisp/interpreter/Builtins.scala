@@ -1,7 +1,6 @@
 package com.dillonbeliveau.dillvmisp.interpreter
 
-import com.dillonbeliveau.dillvmisp._
-import com.dillonbeliveau.dillvmisp.lang.{LispNil, LispNumber, Term, Value}
+import com.dillonbeliveau.dillvmisp.lang._
 
 /**
   * Created by Dillon on 3/5/17.

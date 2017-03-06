@@ -1,5 +1,7 @@
 package com.dillonbeliveau.dillvmisp
 
+import com.dillonbeliveau.dillvmisp.lang._
+import com.dillonbeliveau.dillvmisp.parser.LispParser
 import org.scalatest.{FlatSpec, Matchers}
 
 /**

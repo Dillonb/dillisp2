@@ -1,6 +1,6 @@
 package com.dillonbeliveau.dillvmisp.interpreter
 
-import com.dillonbeliveau.dillvmisp.{LispNumber}
+import com.dillonbeliveau.dillvmisp.lang.LispNumber
 import org.scalatest.{FlatSpec, Matchers}
 
 /**
