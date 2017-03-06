@@ -1,4 +1,4 @@
-package com.dillonbeliveau.dillvmisp
+package com.dillonbeliveau.dillvmisp.lang
 
 /**
   * Created by dillon on 3/1/17.

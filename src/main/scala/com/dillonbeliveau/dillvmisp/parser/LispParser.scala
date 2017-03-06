@@ -1,4 +1,6 @@
-package com.dillonbeliveau.dillvmisp
+package com.dillonbeliveau.dillvmisp.parser
+
+import com.dillonbeliveau.dillvmisp.lang._
 
 import scala.util.parsing.combinator.JavaTokenParsers
 

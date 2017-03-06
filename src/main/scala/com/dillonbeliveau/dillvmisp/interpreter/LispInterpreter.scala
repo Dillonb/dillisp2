@@ -1,42 +1,13 @@
 package com.dillonbeliveau.dillvmisp.interpreter
 
 import com.dillonbeliveau.dillvmisp._
+import com.dillonbeliveau.dillvmisp.lang._
+import com.dillonbeliveau.dillvmisp.parser.LispParser
 
 /**
   * Created by Dillon on 3/5/17.
   */
 
-object Builtins {
-  def get: Map[String, Value] =
-    Map(
-      "+" -> new PlusFunction(LispNumber(0)),
-
-      "lambda" -> new NewLambda()
-    )
-}
-
-class PlusFunction(value: LispNumber) extends Function {
-  override def apply(arg: Value): Value = arg match {
-    case LispNumber(addend) => {
-      new PlusFunction(LispNumber(value.number + addend))
-    }
-  }
-
-  override def toString: String = s"+${value.number}"
-
-  override def result: Value = value
-}
-
-class NewLambda extends Value {
-  private def unrollArgList(args: Term): List[String] = args match {
-    case Cons(LispToken(name), xs) => name :: unrollArgList(xs)
-    case LispNil => Nil
-  }
-
-  def apply(args: Term, body: Term, scope: Scope): LambdaFunction = {
-    LambdaFunction(unrollArgList(args), scope, body)
-  }
-}
 
 trait ScopeObject {
   def newChild: Scope = Scope(Map.empty, this)
@@ -53,25 +24,6 @@ case object TopLevelScope extends ScopeObject {
   override def newChild: Scope = this.newChildWith(Builtins.get)
 }
 
-trait Function extends Value {
-  def apply(arg: Value): Value
-  def result: Value
-}
-
-object LambdaFunction {
-  def apply(args: Seq[String], scope: Scope, body: Term, appliedArguments: Map[String, Value] = Map.empty): LambdaFunction = new LambdaFunction(args, scope, body, appliedArguments)
-}
-class LambdaFunction(args: Seq[String], scope: Scope, body: Term, appliedArguments: Map[String, Value] = Map.empty) extends Value with Function {
-  def apply(arg: Value): Value = args match {
-    case x :: Nil => LispInterpreter.interpret(body, scope.newChildWith(appliedArguments + (x -> arg)))
-    case x :: xs => LambdaFunction(xs, scope, body, appliedArguments + (x -> arg))
-  }
-
-  override def toString: String = s"(lambda (args) ${body.toString}"
-
-  // If we're being forced to return a result (this will happen if we're called like `(fn)`, return the function with currying as-is.
-  override def result: Value = this
-}
 
 object LispInterpreter {
   def interpret(code: String): Value = interpret(LispParser.quickParse(code))
