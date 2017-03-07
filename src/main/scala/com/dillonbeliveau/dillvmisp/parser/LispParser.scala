@@ -18,7 +18,7 @@ object LispParser extends JavaTokenParsers {
   def string: Parser[LispString] = "\"" ~> "[^\"]*".r <~ "\"" ^^ (s => LispString(s))
   def number: Parser[LispNumber] = """\d+\.?\d*""".r ^^ (s => LispNumber(s.toDouble))
   def value: Parser[Value] = string | number
-  def token: Parser[LispToken] = """[A-Za-z\+\-\*\$\%\&\#\@]+""".r ^^ (s => LispToken(s))
+  def token: Parser[LispToken] = """[^\d\s"()][^\s"()]*""".r ^^ (s => LispToken(s))
   def list: Parser[Cons] = "(" ~> (expression+) <~ ")" ^^ (exprs => listToConsTree(exprs))
   def expression: Parser[Term] = value | list | token
 

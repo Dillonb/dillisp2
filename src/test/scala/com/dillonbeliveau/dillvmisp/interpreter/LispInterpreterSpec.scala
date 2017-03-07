@@ -37,7 +37,7 @@ class LispInterpreterSpec extends FlatSpec with Matchers {
   "interpret" should "apply a lambda function with three arguments" in {
     LispInterpreter.interpret("(do (define addThreeNumbers (lambda (x y z) (+ x y z))) (addThreeNumbers 1 2 3))") shouldBe LispNumber(6)
   }
-  "interpret" should "apply a lambda functios with a nested expression in its body" in {
+  "interpret" should "apply a lambda function with a nested expression in its body" in {
     LispInterpreter.interpret("(do (define addTwoInAStupidWay (lambda (x) (+ (+ 1 x) 1))) (addTwoInAStupidWay 1))") shouldBe LispNumber(3)
   }
   "interpret" should "be able to use list functions from the standard library" in {
