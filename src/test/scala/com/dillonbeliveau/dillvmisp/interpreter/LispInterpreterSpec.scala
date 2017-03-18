@@ -34,14 +34,37 @@ class LispInterpreterSpec extends FlatSpec with Matchers {
   "interpret" should "apply a lambda function with two arguments" in {
     LispInterpreter.interpret("(do (define addTwoNumbers (lambda (x y) (+ x y))) (addTwoNumbers 1 2))") shouldBe LispNumber(3)
   }
+
   "interpret" should "apply a lambda function with three arguments" in {
     LispInterpreter.interpret("(do (define addThreeNumbers (lambda (x y z) (+ x y z))) (addThreeNumbers 1 2 3))") shouldBe LispNumber(6)
   }
+
   "interpret" should "apply a lambda function with a nested expression in its body" in {
     LispInterpreter.interpret("(do (define addTwoInAStupidWay (lambda (x) (+ (+ 1 x) 1))) (addTwoInAStupidWay 1))") shouldBe LispNumber(3)
   }
+
   "interpret" should "be able to use list functions from the standard library" in {
     LispInterpreter.interpret("(do (define a (cons 1 2)) (car a))") shouldBe LispNumber(1)
     LispInterpreter.interpret("(do (define a (cons 1 2)) (cdr a))") shouldBe LispNumber(2)
+  }
+
+  "interpret" should "subtract some numbers" in {
+    LispInterpreter.interpret("(- 10 5)") shouldBe LispNumber(5)
+    LispInterpreter.interpret("(- 10 5 2)") shouldBe LispNumber(3)
+  }
+
+  "interpret" should "multiply some numbers" in {
+    LispInterpreter.interpret("(* 2 2)") shouldBe LispNumber(4)
+    LispInterpreter.interpret("(* 5 2)") shouldBe LispNumber(10)
+    LispInterpreter.interpret("(* 5 2 10)") shouldBe LispNumber(100)
+  }
+
+  "interpret" should "divide some numbers" in {
+    LispInterpreter.interpret("(/ 10 2)") shouldBe LispNumber(5)
+    LispInterpreter.interpret("(/ 10 2 2)") shouldBe LispNumber(2.5)
+  }
+
+  "interpret" should "modulo some numbers" in {
+    LispInterpreter.interpret("(% 10 2)") shouldBe LispNumber(0)
   }
 }
