@@ -88,4 +88,14 @@ class LispParserSpec extends FlatSpec with Matchers {
   "parse" should "parse a list of numbers" in {
     LispParser.quickParse("(1 2 3)") shouldBe  Cons(LispNumber(1), Cons(LispNumber(2), Cons(LispNumber(3), LispNil)))
   }
+
+  "parse" should "parse true" in {
+    LispParser.quickParse("true") shouldBe LispTrue
+    LispParser.quickParse("(true)") shouldBe Cons(LispTrue, LispNil)
+  }
+
+  "parse" should "parse false" in {
+    LispParser.quickParse("false") shouldBe LispFalse
+    LispParser.quickParse("(false)") shouldBe Cons(LispFalse, LispNil)
+  }
 }

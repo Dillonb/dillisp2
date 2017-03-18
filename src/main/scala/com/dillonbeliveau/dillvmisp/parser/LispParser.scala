@@ -15,9 +15,13 @@ object LispParser extends JavaTokenParsers {
     case x :: xs => Cons(x, listToConsTree(xs))
   }
 
+  def boolTrue: Parser[LispBoolean] = "true".r ^^ (_ => LispTrue)
+  def boolFalse: Parser[LispBoolean] = "false".r ^^ (_ => LispFalse)
+  def boolean: Parser[LispBoolean] = boolTrue | boolFalse
+
   def string: Parser[LispString] = "\"" ~> "[^\"]*".r <~ "\"" ^^ (s => LispString(s))
   def number: Parser[LispNumber] = """\d+\.?\d*""".r ^^ (s => LispNumber(s.toDouble))
-  def value: Parser[Value] = string | number
+  def value: Parser[Value] = string | number | boolean
   def token: Parser[LispToken] = """[^\d\s"()][^\s"()]*""".r ^^ (s => LispToken(s))
   def list: Parser[Cons] = "(" ~> (expression+) <~ ")" ^^ (exprs => listToConsTree(exprs))
   def expression: Parser[Term] = value | list | token
